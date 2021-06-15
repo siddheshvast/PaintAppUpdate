@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -26,6 +25,7 @@ import com.kyanogen.signatureview.SignatureView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -104,37 +104,21 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        imgColor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        imgColor.setOnClickListener(v -> opencolorPicker());
 
-                opencolorPicker();
-            }
-        });
+        imgEraser.setOnClickListener(v -> signatureView.clearCanvas());
 
-        imgEraser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        imgSave.setOnClickListener(v -> {
 
-                signatureView.clearCanvas();
-
-            }
-        });
-
-        imgSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (!signatureView.isBitmapEmpty()) {
-                    try {
-                        saveimage();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(MainActivity.this, "Couldn't Save", Toast.LENGTH_SHORT).show();
-                    }
+            if (!signatureView.isBitmapEmpty()) {
+                try {
+                    saveimage();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(MainActivity.this, "Couldn't Save", Toast.LENGTH_SHORT).show();
                 }
-
             }
+
         });
 
 
@@ -169,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void saveimage() throws IOException {
+    private void saveimage() throws FileNotFoundException {
 
         File file = new File(filename);
 
@@ -183,9 +167,21 @@ public class MainActivity extends AppCompatActivity {
 
         FileOutputStream fos = new FileOutputStream(file);
 
-        fos.write(bitmapData);
-        fos.flush();
-        fos.close();
+        try {
+            fos.write(bitmapData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Toast.makeText(this, "painting Saved !!", Toast.LENGTH_SHORT).show();
 
